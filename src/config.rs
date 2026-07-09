@@ -65,7 +65,9 @@ pub fn load_config(path: PathBuf) -> &'static Config {
         }],
         layouts: vec!["en".to_string()],
         reconnect_delay: None,
-        weather: None,
+        weather: Some(WeatherConfig {
+            url: "wttr.in/Hamburg?format=%t".to_string(),
+        }),
         extended_media: None,
         claude_usage: None,
     };
