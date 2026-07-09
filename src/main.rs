@@ -13,11 +13,15 @@ use config::load_config;
 use keyboard::Keyboard;
 
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]
-use providers::{_base::Provider, layout::LayoutProvider, relay::RelayProvider, time::TimeProvider, volume::VolumeProvider};
+use providers::{
+    _base::Provider, claude_usage::ClaudeUsageProvider, layout::LayoutProvider, relay::RelayProvider, time::TimeProvider,
+    volume::VolumeProvider,
+};
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 use providers::{
-    _base::Provider, layout::LayoutProvider, relay::RelayProvider, time::TimeProvider, volume::VolumeProvider, weather::WeatherProvider,
+    _base::Provider, claude_usage::ClaudeUsageProvider, layout::LayoutProvider, relay::RelayProvider, time::TimeProvider,
+    volume::VolumeProvider, weather::WeatherProvider,
 };
 
 use tokio::sync::{broadcast, mpsc};
@@ -77,13 +81,19 @@ fn get_providers(
     host_to_device_sender: &broadcast::Sender<Vec<u8>>,
     device_to_host_sender: &broadcast::Sender<Vec<u8>>,
 ) -> Vec<Box<dyn Provider>> {
-    return vec![
+    let mut providers: Vec<Box<dyn Provider>> = vec![
         TimeProvider::new(host_to_device_sender.clone()),
         VolumeProvider::new(host_to_device_sender.clone()),
         LayoutProvider::new(host_to_device_sender.clone()),
         MediaProvider::new(host_to_device_sender.clone()),
         RelayProvider::new(host_to_device_sender.clone(), device_to_host_sender.clone()),
     ];
+
+    if let Some(claude_usage_config) = &config::get_config().claude_usage {
+        providers.push(ClaudeUsageProvider::new(host_to_device_sender.clone(), claude_usage_config.clone()));
+    }
+
+    return providers;
 }
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
@@ -106,6 +116,10 @@ fn get_providers(
 
     if let Some(weather_config) = &config::get_config().weather {
         providers.push(WeatherProvider::new(host_to_device_sender.clone(), weather_config.url.clone()));
+    }
+
+    if let Some(claude_usage_config) = &config::get_config().claude_usage {
+        providers.push(ClaudeUsageProvider::new(host_to_device_sender.clone(), claude_usage_config.clone()));
     }
 
     return providers;

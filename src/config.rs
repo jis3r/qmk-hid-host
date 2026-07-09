@@ -6,6 +6,17 @@ pub struct WeatherConfig {
     pub url: String,
 }
 
+#[derive(serde::Deserialize, serde::Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ClaudeUsageConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub poll_interval_seconds: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub keychain_service: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credentials_path: Option<PathBuf>,
+}
+
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
@@ -17,6 +28,8 @@ pub struct Config {
     pub weather: Option<WeatherConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extended_media: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub claude_usage: Option<ClaudeUsageConfig>,
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -52,10 +65,9 @@ pub fn load_config(path: PathBuf) -> &'static Config {
         }],
         layouts: vec!["en".to_string()],
         reconnect_delay: None,
-        weather: Some(WeatherConfig {
-            url: "wttr.in/Hamburg?format=%t".to_string(),
-        }),
+        weather: None,
         extended_media: None,
+        claude_usage: None,
     };
 
     if let Ok(file) = std::fs::read_to_string(&path) {

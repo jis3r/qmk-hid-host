@@ -8,6 +8,7 @@ pub enum DataType {
     Weather = 0xAF,
     MediaPlayerLinux = 0xB0,
     MediaExtended = 0xB1,
+    ClaudeUsage = 0xB2,
 
     RelayFromDevice = 0xCC,
     RelayToDevice,
@@ -20,6 +21,7 @@ pub enum DataType {
     Layout,
     Spotify = 0xAE,
     Weather = 0xAF,
+    ClaudeUsage = 0xB2,
 
     RelayFromDevice = 0xCC,
     RelayToDevice,
