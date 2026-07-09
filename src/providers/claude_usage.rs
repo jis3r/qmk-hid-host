@@ -16,6 +16,7 @@ use crate::data_type::DataType;
 use super::_base::Provider;
 
 const DEFAULT_POLL_INTERVAL_SECONDS: u64 = 60;
+const DEFAULT_KEYCHAIN_SERVICE: &str = "Claude Code-credentials";
 const RAW_HID_REPORT_SIZE: usize = 32;
 const USAGE_ENDPOINT: &str = "https://api.anthropic.com/api/oauth/usage";
 const OAUTH_BETA_HEADER: &str = "oauth-2025-04-20";
@@ -121,10 +122,8 @@ impl ClaudeCodeTokenSource {
 impl TokenSource for ClaudeCodeTokenSource {
     fn load_token(&self) -> Result<OAuthToken, ClaudeUsageError> {
         #[cfg(target_os = "macos")]
-        if let Some(service) = self.keychain_service.as_deref() {
-            if let Ok(token) = load_keychain_token(service) {
-                return Ok(token);
-            }
+        if let Ok(token) = load_keychain_token(keychain_service(self.keychain_service.as_deref())) {
+            return Ok(token);
         }
 
         self.load_file_token()
@@ -272,6 +271,11 @@ fn wait_for_next_poll(is_started: &AtomicBool, poll_interval: Duration) {
 
         std::thread::sleep(remaining.min(Duration::from_secs(1)));
     }
+}
+
+#[cfg(target_os = "macos")]
+fn keychain_service(configured_service: Option<&str>) -> &str {
+    configured_service.unwrap_or(DEFAULT_KEYCHAIN_SERVICE)
 }
 
 #[cfg(target_os = "macos")]
@@ -472,5 +476,11 @@ mod tests {
         let report = poll_report(&StaticTokenSource, &StaticUsageClient).unwrap();
 
         assert_eq!(report[0], DataType::ClaudeUsage as u8);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn keychain_service_should_default_to_claude_code_credentials() {
+        assert_eq!(keychain_service(None), DEFAULT_KEYCHAIN_SERVICE);
     }
 }

@@ -99,7 +99,7 @@ Default configuration is set to [stront](https://github.com/zzeneg/stront). For 
 - `weather` - optional weather provider config for Linux and MacOS. The URL should return a temperature value, for example `wttr.in/Hamburg?format=%t`
 - `claudeUsage` - optional Claude Code usage provider. It sends a 32-byte Raw HID report every successful poll.
   - `pollIntervalSeconds` - optional poll interval (default is 60 seconds)
-  - `keychainService` - optional macOS Keychain service name. When configured, it is tried before the credentials file.
+  - `keychainService` - optional macOS Keychain service name. Defaults to `Claude Code-credentials`, then falls back to the credentials file.
   - `credentialsPath` - optional credentials-file path (default is `~/.claude/.credentials.json`)
 
 `claudeUsage` never stores OAuth tokens in this config or logs them. It reads the existing Claude Code OAuth credentials only while polling.
@@ -108,8 +108,7 @@ Example:
 
 ```json
 "claudeUsage": {
-  "pollIntervalSeconds": 60,
-  "keychainService": "your-configured-service-name"
+  "pollIntervalSeconds": 60
 }
 ```
 
