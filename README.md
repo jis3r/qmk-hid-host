@@ -97,12 +97,12 @@ Default configuration is set to [stront](https://github.com/zzeneg/stront). For 
 - `layouts` - list of supported keyboard layouts in two-letter format (app sends layout's index, not name)
 - `reconnectDelay` - delay between reconnecting attempts in milliseconds (optional, default is 5000)
 - `weather` - optional weather provider config for Linux and MacOS. The URL should return a temperature value, for example `wttr.in/Hamburg?format=%t`
-- `claudeUsage` - optional Claude Code usage provider. It sends a 32-byte Raw HID report every successful poll.
+- `claudeUsage` - optional Claude Code usage provider. It sends session, weekly, and extra-usage budget data plus typed failures in a 32-byte Raw HID report.
   - `pollIntervalSeconds` - optional poll interval (default is 60 seconds)
   - `keychainService` - optional macOS Keychain service name. Defaults to `Claude Code-credentials`, then falls back to the credentials file.
   - `credentialsPath` - optional credentials-file path (default is `~/.claude/.credentials.json`)
 
-`claudeUsage` never stores OAuth tokens in this config or logs them. It reads the existing Claude Code OAuth credentials only while polling.
+`claudeUsage` never stores OAuth tokens in this config or logs them. It reads Claude Code's existing credentials, refreshes an access token five minutes before expiry, and persists rotated credentials back to their original Keychain record or credentials file. An expired refresh token still requires `claude auth login`.
 
 Example:
 
